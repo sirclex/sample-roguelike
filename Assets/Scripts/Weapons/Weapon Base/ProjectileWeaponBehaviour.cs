@@ -28,6 +28,11 @@ public class ProjectileWeaponBehaviour : MonoBehaviour
         Destroy(gameObject, destroyAfterSeconds);
     }
 
+    public float GetCurrentDamage()
+    {
+        return currentDamage *= FindFirstObjectByType<PlayerStats>().currentMight;
+    }
+
     public void DirectionChecker(Vector3 dir)
     {
         direction = dir;
@@ -77,7 +82,7 @@ public class ProjectileWeaponBehaviour : MonoBehaviour
             EnemyStats enemyStats = collision.GetComponent<EnemyStats>();
             if (enemyStats != null)
             {
-                enemyStats.TakeDamage(currentDamage);
+                enemyStats.TakeDamage(GetCurrentDamage());
                 ReducePierce();
             }
         } else if (collision.gameObject.TryGetComponent(out BreakableProps breakable))

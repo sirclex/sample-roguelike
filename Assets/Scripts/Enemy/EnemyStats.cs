@@ -6,13 +6,13 @@ public class EnemyStats : MonoBehaviour
 
     // Current stats
     [HideInInspector]
-    float currentMoveSpeed;
+    public float currentMoveSpeed;
 
     [HideInInspector]
-    float currentHealth;
+    public float currentHealth;
 
     [HideInInspector]
-    float currentDamage;
+    public float currentDamage;
 
     public float despawnDistance = 30f;
     Transform player;

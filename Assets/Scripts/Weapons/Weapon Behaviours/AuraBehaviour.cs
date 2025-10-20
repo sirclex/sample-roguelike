@@ -18,12 +18,12 @@ public class AuraBehaviour : MeleeWeaponBehaviour
             EnemyStats enemyStats = collision.GetComponent<EnemyStats>();
             if (enemyStats != null)
             {
-                enemyStats.TakeDamage(currentDamage);
+                enemyStats.TakeDamage(GetCurrentDamage());
                 markedEnemies.Add(collision.gameObject);
             }
         } else if (collision.gameObject.TryGetComponent(out BreakableProps breakable))
         {
-            breakable.TakeDamage(currentDamage);
+            breakable.TakeDamage(GetCurrentDamage());
         }
     }
 }
