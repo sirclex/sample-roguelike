@@ -1,7 +1,7 @@
 # Roguelike Game Sample
 
-## Project Description
-This is a simple roguelike game developed to showcase programming and game design skills. The game includes core roguelike features such as generated maps, turn-based combat, and permadeath. The project was built to explore concepts like map generation algorithms and game state management.
+## Project Overview
+This is a survival roguelike demo developed to demonstrate my skills in game programming, design, and problem-solving as an aspiring game developer. The game includes core roguelike features such as generated maps, and permadeath. The project was built to explore process of implement core game system, optimize performance, and create engaging gameplay.
 
 ## Technologies Used
 - **Programming Language**: C#
@@ -10,8 +10,9 @@ This is a simple roguelike game developed to showcase programming and game desig
 
 ## Key Features
 - Procedural map generation.
-- Turn-based combat system with basic AI enemies.
-- Character management (health, experience points, items).
+- Real-time combat system.
+- Power-Up system.
+- Permadeath.
 
 ## Installation and Setup
 1. Clone the repository: `git clone https://github.com/sirclex/sample-roguelike`
@@ -21,13 +22,12 @@ This is a simple roguelike game developed to showcase programming and game desig
 
 ## Project Goals
 The project aims to:
-- Demonstrate programming and problem-solving skills.
-- Apply algorithms such as procedural map generation.
-- Learn and improve game development skills.
+- Demonstrate programming and problem-solving skills for game developement.
+- Showcase problem-solving skills through procedural generation and combat system design.
+- Highlight my ability to learn and implement complex game mechanics as a fresher game developer.
 
 ## Future Development
 - Add more enemy types and diverse items.
 - Add currency, shopping and gacha system.
-- Add user interface and graphical effects.
 - Add multiplayer mode.
 - Optimize performance to handle massive amount of enemies (100, 300, 500).
