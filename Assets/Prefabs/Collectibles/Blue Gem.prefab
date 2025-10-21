@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 199170284301078393}
   - component: {fileID: 8432916533204547296}
   - component: {fileID: -8043431229511792171}
+  - component: {fileID: -7539079454905894883}
   m_Layer: 0
   m_Name: Blue Gem
   m_TagString: Untagged
@@ -141,3 +142,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExperienceGem
   experienceGranted: 100
+--- !u!114 &-7539079454905894883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2152014674669111183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efb1d309319d3ea488f99c40bccd2cc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BobbingAnimation
+  frequency: 3
+  magnitude: 0.1
+  direction: {x: 0, y: 1, z: 0}
