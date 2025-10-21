@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be623a4dc038acd46bdc81774f007ccb, type: 3}
   m_Name: Knife Character
   m_EditorClassIdentifier: Assembly-CSharp::CharacterScriptableObject
+  icon: {fileID: 4723107735738678597, guid: 5c2e2a580d399c74d86dc4cf8444bcb0, type: 3}
+  name: Knife Character
   startingWeapon: {fileID: 6310606358346307966, guid: dce7ae55578444f4495c7acd5337bbd6, type: 3}
-  maxHealth: 1000
+  maxHealth: 10
   recovery: 1
   moveSpeed: 5
   might: 1
