@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,12 +12,53 @@ public class InventoryManager : MonoBehaviour
     public int[] passiveItemLevels = new int[6];
     public List<Image> passiveItemUISlots = new List<Image>(6);
 
+    [System.Serializable]
+    public class WeaponUpgrade
+    {
+        public int weaponUpgradeIndex;
+        public GameObject initialWeapon;
+        public WeaponScriptableObject weaponData;
+    }
+
+    [System.Serializable]
+    public class PassiveUpgrade
+    {
+        public int passiveItemUpgradeIndex;
+        public GameObject initialPassiveItem;
+        public PassiveItemScriptableObject passiveItemData;
+    }
+
+    [System.Serializable]
+    public class UpgradeUI
+    {
+        public TextMeshProUGUI upgradeNameDisplay;
+        public TextMeshProUGUI upgradeDescriptionDisplay;
+        public Image upgradeIcon;
+        public Button upgradeButton;
+    }
+
+    public List<WeaponUpgrade> weaponUpgrades = new List<WeaponUpgrade>();
+    public List<PassiveUpgrade> passiveUpgrades = new List<PassiveUpgrade>();
+    public List<UpgradeUI> upgradeUIOptions = new List<UpgradeUI>();
+
+    PlayerStats player;
+
+    void Start()
+    {
+        player = GetComponent<PlayerStats>();
+    }
+
     public void AddWeapon(int slotIndex, WeaponController weapon)
     {
         weaponSlots[slotIndex] = weapon;
         weaponLevels[slotIndex] = weapon.weaponData.Level;
         weaponUISlots[slotIndex].enabled = true;
         weaponUISlots[slotIndex].sprite = weapon.weaponData.Icon;
+
+        if (GameManager.instance != null && GameManager.instance.choosingUpgrade)
+        {
+            GameManager.instance.EndLevelUp();
+        }
     }
 
     public void AddPassiveItem(int slotIndex, PassiveItem passiveItem)
@@ -25,9 +67,14 @@ public class InventoryManager : MonoBehaviour
         passiveItemLevels[slotIndex] = passiveItem.passiveItemData.Level;
         passiveItemUISlots[slotIndex].enabled = true;
         passiveItemUISlots[slotIndex].sprite = passiveItem.passiveItemData.Icon;
+
+        if (GameManager.instance != null && GameManager.instance.choosingUpgrade)
+        {
+            GameManager.instance.EndLevelUp();
+        }
     }
 
-    public void LevelUpWeapon(int slotIndex)
+    public void LevelUpWeapon(int slotIndex, int upgradeIndex)
     {
         if (weaponSlots.Count > slotIndex)
         {
@@ -41,11 +88,18 @@ public class InventoryManager : MonoBehaviour
             upgradedWeapon.transform.SetParent(transform);
             AddWeapon(slotIndex, upgradedWeapon.GetComponent<WeaponController>());
             Destroy(weapon.gameObject);
-            weaponLevels[slotIndex]++;
+            weaponLevels[slotIndex] = upgradedWeapon.GetComponent<WeaponController>().weaponData.Level;
+
+            weaponUpgrades[upgradeIndex].weaponData = upgradedWeapon.GetComponent<WeaponController>().weaponData;
+
+            if (GameManager.instance != null && GameManager.instance.choosingUpgrade)
+            {
+                GameManager.instance.EndLevelUp();
+            }
         }
     }
 
-    public void LevelUpPassiveItem(int slotIndex)
+    public void LevelUpPassiveItem(int slotIndex, int upgradeIndex)
     {
         if (passiveItemSlots.Count > slotIndex)
         {
@@ -59,19 +113,158 @@ public class InventoryManager : MonoBehaviour
             upgradedPassiveItem.transform.SetParent(transform);
             AddPassiveItem(slotIndex, upgradedPassiveItem.GetComponent<PassiveItem>());
             Destroy(passiveItem.gameObject);
-            passiveItemLevels[slotIndex]++;
+            passiveItemLevels[slotIndex] = upgradedPassiveItem.GetComponent<PassiveItem>().passiveItemData.Level;
+
+            passiveUpgrades[upgradeIndex].passiveItemData = upgradedPassiveItem.GetComponent<PassiveItem>().passiveItemData;
+
+            if (GameManager.instance != null && GameManager.instance.choosingUpgrade)
+            {
+                GameManager.instance.EndLevelUp();
+            }
         }
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void ApplyUpgrade()
     {
-        
+        List<WeaponUpgrade> availableWeaponUpgrades = new List<WeaponUpgrade>(weaponUpgrades);
+        List<PassiveUpgrade> availablePassiveItemUpgrades = new List<PassiveUpgrade>(passiveUpgrades);
+
+        foreach (var upgradeOption in upgradeUIOptions)
+        {
+            if (availableWeaponUpgrades.Count == 0 && availablePassiveItemUpgrades.Count == 0)
+            {
+                return;
+            }
+
+            int upgradeType;
+
+            if (availableWeaponUpgrades.Count == 0)
+            {
+                upgradeType = 2;
+            } else if (availablePassiveItemUpgrades.Count == 0)
+            {
+                upgradeType = 1;
+            } else
+            {
+                upgradeType = Random.Range(1, 3);
+            }
+
+            if (upgradeType == 1)
+            {
+                WeaponUpgrade chosenWeaponUpgrade = availableWeaponUpgrades[Random.Range(0, availableWeaponUpgrades.Count)];
+
+                availableWeaponUpgrades.Remove(chosenWeaponUpgrade);
+
+                if (chosenWeaponUpgrade != null)
+                {
+                    EnableUpgradeUI(upgradeOption);
+
+                    bool newWeapon = false;
+                    for (int i = 0; i < weaponSlots.Count; i++)
+                    {
+                        if (weaponSlots[i] != null && weaponSlots[i].weaponData == chosenWeaponUpgrade.weaponData)
+                        {
+                            newWeapon = false;
+                            if (!newWeapon)
+                            {
+
+                                if (!chosenWeaponUpgrade.weaponData.NextLevelPrefab)
+                                {
+                                    DisableUpgradeUI(upgradeOption);
+                                    break;
+                                }
+
+                                upgradeOption.upgradeButton.onClick.AddListener(() => LevelUpWeapon(i, chosenWeaponUpgrade.weaponUpgradeIndex));
+                                upgradeOption.upgradeDescriptionDisplay.text = chosenWeaponUpgrade.weaponData.NextLevelPrefab.GetComponent<WeaponController>().weaponData.Description;
+                                upgradeOption.upgradeNameDisplay.text = chosenWeaponUpgrade.weaponData.NextLevelPrefab.GetComponent<WeaponController>().weaponData.Name;
+                            }
+                            break;
+                        } else
+                        {
+                            newWeapon = true;
+                        }
+                    }
+
+                    if (newWeapon)
+                    {
+                        upgradeOption.upgradeButton.onClick.AddListener(() => player.SpawnWeapon(chosenWeaponUpgrade.initialWeapon));
+                        upgradeOption.upgradeDescriptionDisplay.text = chosenWeaponUpgrade.weaponData.Description;
+                        upgradeOption.upgradeNameDisplay.text = chosenWeaponUpgrade.weaponData.Name;
+                    }
+
+                    upgradeOption.upgradeIcon.sprite = chosenWeaponUpgrade.weaponData.Icon;
+                }
+            } else if (upgradeType == 2)
+            {
+                PassiveUpgrade chosenPassiveUpgrade = availablePassiveItemUpgrades[Random.Range(0, availablePassiveItemUpgrades.Count)];
+
+                availablePassiveItemUpgrades.Remove(chosenPassiveUpgrade);
+
+                if (chosenPassiveUpgrade != null)
+                {
+                    EnableUpgradeUI(upgradeOption);
+
+                    bool newPassive = false;
+
+                    for (int i = 0; i < passiveUpgrades.Count; i++)
+                    {
+                        if (passiveItemSlots[i] != null && passiveItemSlots[i].passiveItemData == chosenPassiveUpgrade.passiveItemData)
+                        {
+                            newPassive = false;
+                            if (!newPassive)
+                            {
+                                if (!chosenPassiveUpgrade.passiveItemData.NextLevelPrefab)
+                                {
+                                    DisableUpgradeUI(upgradeOption);
+                                    break;
+                                }
+
+                                upgradeOption.upgradeButton.onClick.AddListener(() => LevelUpPassiveItem(i, chosenPassiveUpgrade.passiveItemUpgradeIndex));
+                                upgradeOption.upgradeDescriptionDisplay.text = chosenPassiveUpgrade.passiveItemData.NextLevelPrefab.GetComponent<PassiveItem>().passiveItemData.Description;
+                                upgradeOption.upgradeNameDisplay.text = chosenPassiveUpgrade.passiveItemData.NextLevelPrefab.GetComponent<PassiveItem>().passiveItemData.Name;
+                            }
+                            break;
+                        } else
+                        {
+                            newPassive = true;
+                        }
+                    }
+
+                    if (newPassive)
+                    {
+                        upgradeOption.upgradeButton.onClick.AddListener(() => player.SpawnPassiveItem(chosenPassiveUpgrade.initialPassiveItem));
+                        upgradeOption.upgradeDescriptionDisplay.text = chosenPassiveUpgrade.passiveItemData.Description;
+                        upgradeOption.upgradeNameDisplay.text = chosenPassiveUpgrade.passiveItemData.Name;
+                    }
+
+                    upgradeOption.upgradeIcon.sprite = chosenPassiveUpgrade.passiveItemData.Icon;
+                }
+            }
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    void RemoveUpgradeOptions()
     {
-        
+        foreach (var upgradeOption in upgradeUIOptions)
+        {
+            upgradeOption.upgradeButton.onClick.RemoveAllListeners();
+            DisableUpgradeUI(upgradeOption);
+        }
+    }
+
+    public void RemoveAndApplyUpgrades()
+    {
+        RemoveUpgradeOptions();
+        ApplyUpgrade();
+    }
+
+    void DisableUpgradeUI(UpgradeUI upgradeUI)
+    {
+        upgradeUI.upgradeNameDisplay.transform.parent.gameObject.SetActive(false);
+    }
+
+    void EnableUpgradeUI(UpgradeUI upgradeUI)
+    {
+        upgradeUI.upgradeNameDisplay.transform.parent.gameObject.SetActive(true);
     }
 }
