@@ -44,7 +44,25 @@ public class MapController : MonoBehaviour
         playerLastPosition = player.transform.position;
 
         string directionName = GetDirectionName(moveDir);
+        string[] processDirection = directionName.Split(' ');
 
+        if (processDirection.Length == 1)
+        {
+            // Move only up, down, left, right
+            CheckAndSpawnChunk(processDirection[0]);
+        } else if (processDirection.Length == 2)
+        {
+            // Move diagonally
+            CheckAndSpawnChunk(directionName);
+
+            CheckAndSpawnChunk(processDirection[0]);
+
+            CheckAndSpawnChunk(processDirection[1]);
+        }
+    }
+
+    void CheckAndSpawnChunk(string directionName)
+    {
         if (!Physics2D.OverlapCircle(currentChunk.transform.Find(directionName).position, checkerRadius, terrainMask))
         {
             SpawnChunk(currentChunk.transform.Find(directionName).position);
